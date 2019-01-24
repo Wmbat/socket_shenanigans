@@ -19,11 +19,45 @@
 
 
 
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+
+const char* const ip_address = "127.0.0.1";
+const int port_number = 10000;
 
 int main( )
 {
-    printf( "client: Hello, World!\n" );
+    int index;
+    int socket_fd;
+    char receive_buffer[1024];
+    struct sockaddr_in serv_address;
+    
+    if( ( socket_fd = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
+    {
+        return EXIT_FAILURE;
+    }
+    
+    serv_address.sin_family = AF_INET;
+    serv_address.sin_port = htons( port_number );
+    serv_address.sin_addr.s_addr = inet_addr( ip_address );
+    
+    if( connect( socket_fd, ( struct sockaddr* )&serv_address, sizeof( serv_address ) ) < 0 )
+    {
+        return EXIT_FAILURE;
+    }
+    
+    recv( socket_fd, receive_buffer, sizeof( receive_buffer ), 0 );
+    
+    printf( receive_buffer );
     
     return 0;
 }
